@@ -1,0 +1,143 @@
+:root {
+    --board-size: 600px;
+    --cell-size: calc(var(--board-size) / 7);
+    --coin-size: calc(var(--cell-size) * 0.45);
+    --home-size: calc(var(--cell-size) * 2.5);
+    --border-color: #333;
+
+    /* Player colors */
+    --p1-color: #e74c3c; /* Red */
+    --p2-color: #3498db; /* Blue */
+    --p3-color: #f1c40f; /* Yellow */
+    --p4-color: #2ecc71; /* Green */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+    overflow: hidden; 
+}
+
+#game-container {
+    display: grid;
+    grid-template-columns: var(--home-size) var(--board-size) var(--home-size);
+    grid-template-rows: var(--home-size) var(--board-size) var(--home-size);
+    align-items: center;
+    justify-items: center;
+}
+
+#board {
+    grid-area: 2 / 2 / 3 / 3; 
+    width: var(--board-size);
+    height: var(--board-size);
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    border: 2px solid var(--border-color);
+}
+
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.path-cell { background-color: #fdf5e6; }
+
+.safe-zone::before, .safe-zone::after {
+    content: '';
+    position: absolute;
+    width: 80%;
+    height: 3px;
+    background-color: rgba(0, 0, 0, 0.4);
+    top: 50%;
+    left: 10%;
+}
+.safe-zone::before { transform: rotate(45deg); }
+.safe-zone::after { transform: rotate(-45deg); }
+#cell-3-3 { background-color: #ffd700; }
+
+.player-home {
+    width: calc(var(--cell-size) * 2);
+    height: calc(var(--cell-size) * 2);
+    border: 2px dashed var(--border-color);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    padding: 5px;
+    box-sizing: border-box;
+    align-content: center;
+    justify-items: center;
+}
+
+#player-1-home { grid-area: 3 / 2 / 4 / 3; border-color: var(--p1-color); }
+#player-2-home { grid-area: 2 / 3 / 3 / 4; border-color: var(--p2-color); }
+#player-3-home { grid-area: 1 / 2 / 2 / 3; border-color: var(--p3-color); }
+#player-4-home { grid-area: 2 / 1 / 3 / 2; border-color: var(--p4-color); }
+
+/* Coins */
+.coin {
+    width: var(--coin-size);
+    height: var(--coin-size);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 0.2s, top 0.2s, left 0.2s, right 0.2s, bottom 0.2s;
+    position: absolute; 
+}
+
+.coin.movable:hover {
+    transform: scale(1.2);
+    border-color: #fff;
+    box-shadow: 0 0 15px gold;
+    z-index: 10;
+}
+
+.coin[data-player="1"] { background-color: var(--p1-color); }
+.coin[data-player="2"] { background-color: var(--p2-color); }
+.coin[data-player="3"] { background-color: var(--p3-color); }
+.coin[data-player="4"] { background-color: var(--p4-color); }
+
+
+/* --- NEW: Default centering for coins in non-safe cells --- */
+.coin.coin-center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* --- Positioning for multiple coins in one SAFE cell --- */
+.coin.coin-pos-0 { top: 5%; left: 5%; } /* Player 1 */
+.coin.coin-pos-1 { top: 5%; right: 5%; } /* Player 2 */
+.coin.coin-pos-2 { bottom: 5%; left: 5%; } /* Player 3 */
+.coin.coin-pos-3 { bottom: 5%; right: 5%; } /* Player 4 */
+
+
+#ui-panel {
+    width: 200px;
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    transition: grid-area 0.5s ease-in-out;
+}
+
+#player-turn { margin-top: 0; font-size: 1.2em; }
+#message-area { margin: 15px 0; min-height: 40px; color: #555; }
+#dice-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.dice { width: 50px; height: 50px; border: 2px solid var(--border-color); border-radius: 5px; display: flex; justify-content: center; align-items: center; font-size: 2em; font-weight: bold; }
+#roll-dice-btn { padding: 10px 20px; font-size: 1em; border-radius: 5px; border: none; background-color: #27ae60; color: white; cursor: pointer; transition: background-color 0.2s; }
+#roll-dice-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
