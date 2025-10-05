@@ -6,6 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const dice1Display = document.getElementById('dice1');
     const dice2Display = document.getElementById('dice2');
     const uiPanel = document.getElementById('ui-panel');
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+    const playerColors = {
+        1: computedStyle.getPropertyValue('--p1-color').trim() || '#e74c3c',
+        2: computedStyle.getPropertyValue('--p2-color').trim() || '#3498db',
+        3: computedStyle.getPropertyValue('--p3-color').trim() || '#f1c40f',
+        4: computedStyle.getPropertyValue('--p4-color').trim() || '#2ecc71',
+    };
 
     // --- GAME CONFIGURATION ---
     const coinsPerPlayer = 4;
@@ -45,7 +53,29 @@ document.addEventListener('DOMContentLoaded', () => {
         safeSteps.forEach(step => {
             if(step < pathLength) document.getElementById(`cell-${player1Path[step].r}-${player1Path[step].c}`)?.classList.add('safe-zone');
         });
-        document.getElementById(`cell-3-3`).classList.add('safe-zone');
+        const goalCell = document.getElementById(`cell-${goalPosition.r}-${goalPosition.c}`);
+        if (goalCell) {
+            goalCell.classList.add('safe-zone', 'goal-cell');
+            [1, 2, 3, 4].forEach(playerId => {
+                const marker = document.createElement('div');
+                marker.className = `goal-marker player-${playerId}-target`;
+                goalCell.appendChild(marker);
+            });
+        }
+
+        const startPositions = [
+            { player: 1, coord: player1Path[0] },
+            { player: 2, coord: player2Path[0] },
+            { player: 3, coord: player3Path[0] },
+            { player: 4, coord: player4Path[0] },
+        ];
+
+        startPositions.forEach(({ player, coord }) => {
+            const startCell = document.getElementById(`cell-${coord.r}-${coord.c}`);
+            if (startCell) {
+                startCell.classList.add('start-cell', `player-${player}-start`);
+            }
+        });
     }
 
     function createPlayers() {
@@ -75,7 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 coinEl.dataset.coin = coin.id;
 
                 if (coin.position === -1) {
-                    document.getElementById(`player-${player.id}-home`).appendChild(coinEl);
+                    coinEl.classList.add('coin-home');
+                    const homeEl = document.getElementById(`player-${player.id}-home`);
+                    const homeCoinContainer = homeEl?.querySelector('.home-coins');
+                    if (homeCoinContainer) {
+                        homeCoinContainer.appendChild(coinEl);
+                    } else if (homeEl) {
+                        homeEl.appendChild(coinEl);
+                    }
                 } else {
                     let targetCell;
                     let currentPosition = coin.position;
@@ -129,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canEnter && homeCoins.length > 0) {
             const playerHomeEl = document.getElementById(`player-${currentPlayer.id}-home`);
             if (playerHomeEl) {
-                playerHomeEl.querySelectorAll('.coin').forEach(coinEl => coinEl.classList.add('movable'));
+                playerHomeEl.querySelectorAll('.home-coins .coin').forEach(coinEl => coinEl.classList.add('movable'));
             }
             hasMovableCoins = true;
         }
@@ -246,6 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let turnText = `${currentPlayer.name}'s Turn`;
         if (currentPlayer.hasCut) { turnText += ' 👑'; }
         playerTurnDisplay.textContent = turnText;
+        const playerColor = playerColors[currentPlayer.id] || playerColors[1];
+        root.style.setProperty('--current-player-color', playerColor);
         const uiPanelPositions = { 1: '3 / 2 / 4 / 3', 2: '2 / 3 / 3 / 4', 3: '1 / 2 / 2 / 3', 4: '2 / 1 / 3 / 2' };
         uiPanel.style.gridArea = uiPanelPositions[currentPlayer.id];
     }
